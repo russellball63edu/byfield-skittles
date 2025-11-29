@@ -1,73 +1,152 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Byfield Skittles League</title>
-<meta name="theme-color" content="#006f62">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="icon" href="icon-192.png">
-
+<title>Byfield Skittles League + Highest Scores</title>
 <style>
-  :root{--primary:#006f62;--accent:#25D366}
-  body{font-family:Arial,sans-serif;margin:0;padding:15px 10px;background:#f4f4f4;color:#333;touch-action:pan-y}
-  h1{text-align:center;color:var(--primary);font-size:2.2rem;margin:10px 0}
-  h2{text-align:center;color:var(--primary);margin:40px 0 15px}
-  .table-container{overflow-x:auto;margin:20px 0}
-  table{border-collapse:collapse;background:white;box-shadow:0 4px 20px rgba(0,0,0,.15);width:100%;table-layout:fixed;font-size:1em}
-  th,td{padding:12px 8px;text-align:center;border:1px solid #aaa;vertical-align:middle}
-  th{background:var(--primary);color:white;font-weight:bold}
-  .col-team{width:210px!important;min-width:210px!important;max-width:210px!important}
-  .team-name{text-align:left!important;padding-left:15px;background:#eefaf8!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.1em!important;font-weight:bold!important}
-  input{width:100%;padding:8px 4px;border:none;background:transparent;font-weight:bold;box-sizing:border-box;font-size:1em}
-  .legs,.diff{font-weight:bold;background:#f8f8f8}
-  .points{font-weight:bold;font-size:1.2em;background:#e8f5e9}
-  #highestTable{max-width:800px;margin:40px auto;border:3px solid #8e44ad;border-radius:12px;overflow:hidden}
-  #highestTable th{background:#8e44ad;color:white}
-  #highestTable .score-row td{font-size:2.4em;font-weight:bold;color:var(--primary);background:#f0f8f7!important;height:80px}
-  .button-bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:25px 0}
-  .action-btn{flex:1 1 130px;min-width:110px;padding:13px 8px;font-size:14px;font-weight:bold;border:none;border-radius:10px;color:white;cursor:pointer;transition:.3s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
-  .action-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.3)}
-  #addBtn{background:#2980b9}#undoBtn{background:#e74c3c}#redoBtn{background:#9b59b6}
-  #csvBtn{background:#27ae60}#pdfBtn{background:#f39c12}#waBtn{background:var(--accent)}#emailBtn{background:#c71610}
-  #undoBtn:disabled,#redoBtn:disabled{background:#95a5a6!important;cursor:not-allowed;transform:none!important;box-shadow:none}
-  .status{text-align:center;color:#0a0;font-weight:bold;margin:10px 0;font-size:1.1em}
-  .swipe-hint{text-align:center;font-size:.9em;color:#666;margin:15px 0;display:none}
-  @media(max-width:768px){.swipe-hint{display:block}}
-  #copyPopup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--accent);color:white;padding:20px 40px;border-radius:16px;font-size:1.4em;font-weight:bold;box-shadow:0 15px 40px rgba(0,0,0,.4);z-index:9999;opacity:0;visibility:hidden;transition:.4s}
-  #copyPopup.show{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1.05)}
-  .sync-badge{position:fixed;bottom:20px;right:20px;background:#27ae60;color:white;padding:10px 18px;border-radius:30px;font-size:0.9em;z-index:99;box-shadow:0 4px 15px rgba(0,0,0,.3)}
-</style>
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 20px; 
+    background: #f4f4f4; 
+    line-height: 1.6;
+    color: #333;
+    position: relative;
+  }
+  h1 { text-align: center; color: #00332e; margin-bottom: 10px; font-size: 2.2rem; }
+  h2 { text-align: center; color: #006f62; margin: 40px 0 15px; }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  .table-container { overflow-x: auto; margin-bottom: 30px; }
+  table { 
+    border-collapse: collapse; 
+    background: white; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+    width: 100%; 
+    table-layout: fixed;
+    font-size: 1em;
+  }
+  th, td { 
+    padding: 12px 8px; 
+    text-align: center; 
+    border: 1px solid #aaa; 
+    vertical-align: middle !important; 
+  }
+  th { background: #006f62; color: white; font-weight: bold; }  /* TEAM COLUMN — FIXED 210px */
+  .col-team { 
+    width: 210px !important;
+    min-width: 210px !important;
+    max-width: 210px !important;
+  }  .team-name { 
+    text-align: left !important; 
+    padding-left: 15px; 
+    background: #eefaf8 !important; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    font-size: 1.1em !important;
+    font-weight: bold !important;
+  }  input { 
+    width: 100%; 
+    padding: 8px 4px; 
+    border: none; 
+    background: transparent; 
+    font-weight: bold; 
+    box-sizing: border-box; 
+    font-size: 1em;
+  }  .legs, .diff { font-weight: bold; background: #f8f8f8; }
+  .points { font-weight: bold; font-size: 1.2em; background: #e8f5e9; }  #highestTable { 
+    max-width: 800px; 
+    margin: 40px auto; 
+    border: 3px solid #8e44ad; 
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 1em;
+  }
+  #highestTable th { background: #8e44ad; font-size: 1.4em; }
+  #highestTable .score-row td { 
+    font-size: 2.4em; 
+    font-weight: bold; 
+    color: #006f62; 
+    background: #f0f8f7 !important; 
+    height: 80px;
+  }  /* BUTTONS */
+  .action-btn {
+    margin: 10px 8px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    min-width: 190px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  .action-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }  #addTeamBtn   { background: #2980b9; }
+  #undoBtn      { background: #e74c3c; }
+  #redoBtn      { background: #9b59b6; }
+  #saveCsvBtn   { background: #27ae60; }
+  #savePdfBtn   { background: linear-gradient(45deg, #e67e22, #f39c12); }
+  #shareBtn     { background: #25D366; }  #undoBtn:disabled, #redoBtn:disabled {
+    background: #95a5a6 !important;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none;
+  }  .save-status { text-align: center; color: #0a0; font-weight: bold; margin: 10px 0; font-size: 1.1em; }
+  .history-info { text-align: center; color: #555; font-size: 0.9em; margin-top: 5px; }
+  #pdfContent { display: none; background: white; padding: 40px; }  /* POPUP NOTIFICATION */
+  #copyPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #25D366;
+    color: white;
+    padding: 20px 40px;
+    border-radius: 16px;
+    font-size: 1.4em;
+    font-weight: bold;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+  }
+  #copyPopup.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+</style><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
-<h1>Byfield Skittles League</h1>
-<div class="status" id="status">Loading…</div>
+<h1>Byfield Skittles League Table</h1>
+<div class="save-status" id="status">All changes saved automatically</div>
+<div class="history-info" id="historyInfo">No changes to undo/redo</div>
 
 <div class="table-container">
   <table id="leagueTable">
-    <colgroup><col class="col-team"><col><col><col><col><col><col><col><col></colgroup>
-    <thead><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>D</th><th>Legs +</th><th>Legs -</th><th>Diff</th><th>Pts</th></tr></thead>
+    <colgroup>
+      <col class="col-team">
+      <col><col><col><col><col><col><col><col>
+    </colgroup>
+    <thead>
+      <tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>D</th><th>Legs +</th><th>Legs -</th><th>Diff</th><th>Pts</th></tr>
+    </thead>
     <tbody id="tableBody"></tbody>
   </table>
 </div>
 
-<div class="button-bar">
-  <button class="action-btn" id="addBtn">+ Add Team</button>
-  <button class="action-btn" id="undoBtn" disabled>Undo</button>
-  <button class="action-btn" id="redoBtn" disabled>Redo</button>
-  <button class="action-btn" id="csvBtn">CSV</button>
-  <button class="action-btn" id="pdfBtn">PDF</button>
-  <button class="action-btn" id="waBtn">WhatsApp</button>
-  <button class="action-btn" id="emailBtn">Email</button>
-</div>
-
-<div class="swipe-hint">
-  Swipe left: Undo  Swipe right: Redo  Swipe up: Share  Swipe down: PDF
+<div style="text-align:center; margin: 30px 0;">
+  <button class="action-btn" id="addTeamBtn" onclick="addTeam()">+ Add Team</button>
+  <button class="action-btn" style="background:#e74c3c;" onclick="removeTeam()">- Remove Team</button>
+  <button class="action-btn" id="undoBtn" onclick="undo()" disabled>Undo</button>
+  <button class="action-btn" id="redoBtn" onclick="redo()" disabled>Redo</button>
+  <button class="action-btn" id="saveCsvBtn" onclick="saveAsCSV()">Save as CSV</button>
+  <button class="action-btn" id="savePdfBtn" onclick="saveAsPDF()">Save as PDF</button>
+  <button class="action-btn" id="shareBtn" onclick="shareTable()">ClipBoard / WhatsApp</button>
 </div>
 
 <h2>Highest Score Board</h2>
@@ -78,163 +157,248 @@
       <tr><th>Name</th><th>Club</th><th>Name</th><th>Club</th></tr>
     </thead>
     <tbody>
-      <tr class="score-row"><td colspan="2" contenteditable id="ladies-score">17</td><td colspan="2" contenteditable id="mens-score">0</td></tr>
-      <tr><td contenteditable data-field="l-name-1">M. Watson</td><td contenteditable data-field="l-club-1">GNBL Club</td><td contenteditable data-field="m-name-1">E. Oliver</td><td contenteditable data-field="m-club-1">Long Buckby Club</td></tr>
-      <tr><td contenteditable data-field="l-name-2">M. Elcock</td><td contenteditable data-field="l-club-2">White Horse</td><td contenteditable data-field="m-name-2"></td><td contenteditable data-field="m-club-2"></td></tr>
-      <tr><td contenteditable data-field="l-name-3">G. Stanford</td><td contenteditable data-field="l-club-3">GNBL Club</td><td contenteditable data-field="m-name-3"></td><td contenteditable data-field="m-club-3"></td></tr>
-      <tr><td contenteditable data-field="l-name-4"></td><td contenteditable data-field="l-club-4"></td><td contenteditable data-field="m-name-4"></td><td contenteditable data-field="m-club-4"></td></tr>
+      <tr class="score-row">
+        <td colspan="2" contenteditable="true" id="ladies-score">17</td>
+        <td colspan="2" contenteditable="true" id="mens-score">0</td>
+      </tr>
+      <tr>
+        <td contenteditable="true" data-field="l-name-1">M. Watson</td>
+        <td contenteditable="true" data-field="l-club-1">GNBL Club</td>
+        <td contenteditable="true" data-field="m-name-1">E. Oliver</td>
+        <td contenteditable="true" data-field="m-club-1">Long Buckby Club</td>
+      </tr>
+      <tr>
+        <td contenteditable="true" data-field="l-name-2">M. Elcock</td>
+        <td contenteditable="true" data-field="l-club-2">White Horse</td>
+        <td contenteditable="true" data-field="m-name-2"></td>
+        <td contenteditable="true" data-field="m-club-2"></td>
+      </tr>
+      <tr>
+        <td contenteditable="true" data-field="l-name-3">G. Stanford</td>
+        <td contenteditable="true" data-field="l-club-3">GNBL Club</td>
+        <td contenteditable="true" data-field="m-name-3"></td>
+        <td contenteditable="true" data-field="m-club-3"></td>
+      </tr>
+      <tr>
+        <td contenteditable="true" data-field="l-name-4"></td>
+        <td contenteditable="true" data-field="l-club-4"></td>
+        <td contenteditable="true" data-field="m-name-4"></td>
+        <td contenteditable="true" data-field="m-club-4"></td>
+      </tr>
     </tbody>
   </table>
 </div>
 
+<div id="pdfContent">
+  <h1 style="text-align:center;color:#00332e;margin-bottom:30px;">Byfield Skittles League Table</h1>
+  <div id="pdfLeagueTable"></div>
+  <h2 style="text-align:center;color:#006f62;margin:50px 0 20px;">Highest Score Board</h2>
+  <div id="pdfHighestTable"></div>
+</div>
+
+<!-- POPUP BOX -->
 <div id="copyPopup">Copied to clipboard!</div>
-<div class="sync-badge">Synced</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script>
+// SHOW POPUP FUNCTION
+function showCopyPopup() {
+  const popup = document.getElementById('copyPopup');
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 2000);
+}
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBoiYdgcB5_rRODSBfi4q1msQidSds9K50",
-  authDomain: "byfield-skittles.firebaseapp.com",
-  databaseURL: "https://byfield-skittles-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "byfield-skittles",
-  storageBucket: "byfield-skittles.firebasestorage.app",
-  messagingSenderId: "903725958264",
-  appId: "1:903725958264:web:f685035b842974ac13598d",
-  measurementId: "G-WSTX3MWKWZ"
-};
+// SHARE VIA WHATSAPP + POPUP
+function shareTable() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB');
+  const timeStr = now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  
+  let message = `*BYFIELD SKITTLES LEAGUE TABLE*%0AUpdated: ${dateStr} at ${timeStr}%0A%0A`;
+  teams.forEach((team, i) => {
+    const pos = (i + 1).toString().padStart(2);
+    const pts = team.w * 2 + team.d;
+    message += `${pos}. ${team.name} — ${pts} pts (${team.p} played)%0A`;
+  });
+  message += `%0AHighest Ladies: ${document.getElementById('ladies-score').textContent.trim()} pins%0A`;
+  message += `Highest Mens: ${document.getElementById('mens-score').textContent.trim()} pins%0A%0A`;
+  message += `Live table: ${window.location.href}`;
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const leagueRef = ref(db, 'league/v1');
-
-  let state = { teams: [], highest: {} };
-  let history = [], future = [], isUndoing = false, isLocalChange = false;
-  window.lastSyncTs = 0;
-
-  const defaultState = {
-    teams: [
-      {name:"Peppermill 'A'",          p:11, w:9,  l:2,  d:0, lf:399, la:324},
-      {name:"Silverstone",             p:11, w:8,  l:2,  d:1, lf:401, la:342},
-      {name:"White Horse Norton",      p:10, w:6,  l:4,  d:0, lf:338, la:311},
-      {name:"Greens Norton BL Club",   p:11, w:6,  l:5,  d:0, lf:361, la:369},
-      {name:"Wheatsheaf",              p:10, w:5,  l:4,  d:1, lf:332, la:321},
-      {name:"Peppermill 'B'",          p:10, w:5,  l:5,  d:0, lf:344, la:333},
-      {name:"Live and Let Live",       p:10, w:5,  l:5,  d:0, lf:320, la:333},
-      {name:"Long Buckby Social",      p:11, w:4,  l:7,  d:0, lf:370, la:395},
-      {name:"Daventry Workers",        p:11, w:4,  l:7,  d:0, lf:352, la:388},
-      {name:"Napton Victory Club",     p:10, w:3,  l:7,  d:0, lf:298, la:367},
-      {name:"Kings Arms",              p:11, w:2,  l:9,  d:0, lf:347, la:379}
-    ],
-    highest: {
-      "ladies-score":"17","mens-score":"0",
-      "l-name-1":"M. Watson","l-club-1":"GNBL Club",
-      "l-name-2":"M. Elcock","l-club-2":"White Horse",
-      "l-name-3":"G. Stanford","l-club-3":"GNBL Club",
-      "m-name-1":"E. Oliver","m-club-1":"Long Buckby Club"
-    }
-  };
-
-  // THIS IS THE FIX → we now wait for Firebase once, then fall back safely
-  let firebaseLoaded = false;
-  const unsubscribe = onValue(leagueRef, (snap) => {
-    if (snap.exists() && snap.val().ts > window.lastSyncTs) {
-      const d = snap.val();
-      window.lastSyncTs = d.ts;
-      state = d.data;
-      localStorage.setItem('byfieldState', JSON.stringify(state));
-    } else if (!firebaseLoaded) {
-      // First load — use localStorage or default
-      const saved = localStorage.getItem('byfieldState');
-      state = saved ? JSON.parse(saved) : structuredClone(defaultState);
-      if (!saved) syncToCloud(); // seed Firebase if empty
-    }
-    firebaseLoaded = true;
-    applyState();
-    document.getElementById('status').textContent = 'All changes saved automatically';
+  // Always copy to clipboard first
+  navigator.clipboard.writeText(message.replace(/%0A/g, '\n')).then(() => {
+    showCopyPopup(); // Show popup
   });
 
-  function applyState() {
-    state.teams.forEach(t => t.p = t.w + t.l + t.d);
-    renderTable();
-    updateHighestScores();
-    updateButtons();
+  // Then open WhatsApp/SMS on mobile
+  if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    window.location.href = `whatsapp://send?text=${message}`;
+    setTimeout(() => {
+      if (!document.hidden) window.location.href = `sms:?body=${message}`;
+    }, 1000);
   }
+}
 
-  function renderTable() {
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
-    state.teams.forEach((t,i) => {
-      const diff = t.lf - t.la;
-      const pts = t.w*2 + t.d;
-      tbody.innerHTML += `<tr>
-        <td class="team-name" contenteditable data-index="${i}">${t.name}</td>
-        <td><input type="number" readonly value="${t.p}" style="background:#f0f0f0"></td>
-        <td><input type="number" data-index="${i}" data-field="w" value="${t.w}"></td>
-        <td><input type="number" data-index="${i}" data-field="l" value="${t.l}"></td>
-        <td><input type="number" data-index="${i}" data-field="d" value="${t.d}"></td>
-        <td class="legs"><input type="number" data-index="${i}" data-field="lf" value="${t.lf}"></td>
-        <td class="legs"><input type="number" data-index="${i}" data-field="la" value="${t.la}"></td>
+// FULL DATA & LOGIC (unchanged)
+const originalTeams = [
+  { name: "Peppermill 'A'", p:11, w:9, l:2, d:0, lf:399, la:324 },
+  { name: "Silverstone", p:11, w:8, l:2, d:1, lf:401, la:342 },
+  { name: "White Horse Norton", p:10, w:6, l:4, d:0, lf:338, la:311 },
+  { name: "Greens Norton BL Club", p:11, w:6, l:5, d:0, lf:361, la:369 },
+  { name: "Wheatsheaf", p:10, w:5, l:4, d:1, lf:332, la:321 },
+  { name: "Peppermill 'B'", p:10, w:5, l:5, d:0, lf:344, la:333 },
+  { name: "Live and Let Live", p:10, w:5, l:5, d:0, lf:320, la:333 },
+  { name: "Long Buckby Social", p:11, w:4, l:7, d:0, lf:370, la:395 },
+  { name: "Daventry Workers", p:11, w:4, l:7, d:0, lf:352, la:388 },
+  { name: "Napton Victory Club", p:10, w:3, l:7, d:0, lf:298, la:367 },
+  { name: "Kings Arms", p:11, w:2, l:9, d:0, lf:347, la:379 }
+];
+
+let teams = JSON.parse(localStorage.getItem('byfieldSkittlesLeague')) || JSON.parse(JSON.stringify(originalTeams));
+let history = [], future = [], isUndoing = false;
+
+function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+function saveToHistory() { if (!isUndoing) { history.push(deepClone(teams)); future = []; updateHistoryButtons(); } }
+function applyState(t) { teams = deepClone(t); localStorage.setItem('byfieldSkittlesLeague', JSON.stringify(teams)); renderTable(); }
+
+function undo() { if (history.length===0) return; isUndoing=true; future.push(deepClone(teams)); applyState(history.pop()); updateHistoryButtons(); document.getElementById('status').textContent='Undone!'; setTimeout(() => document.getElementById('status').textContent='All changes saved automatically',2000); isUndoing=false; }
+function redo() { if (future.length===0) return; isUndoing=true; history.push(deepClone(teams)); applyState(future.pop()); updateHistoryButtons(); document.getElementById('status').textContent='Redone!'; setTimeout(() => document.getElementById('status').textContent='All changes saved automatically',2000); isUndoing=false; }
+
+function updateHistoryButtons() {
+  document.getElementById('undoBtn').disabled = history.length === 0;
+  document.getElementById('redoBtn').disabled = future.length === 0;
+  document.getElementById('historyInfo').textContent = history.length || future.length ? `${history.length} undo • ${future.length} redo` : "No changes to undo/redo";
+}
+
+let highestScores = JSON.parse(localStorage.getItem('byfieldHighestScores')) || {
+  "ladies-score": "17", "mens-score": "0",
+  "l-name-1": "M. Watson", "l-club-1": "GNBL Club",
+  "l-name-2": "M. Elcock", "l-club-2": "White Horse",
+  "l-name-3": "G. Stanford", "l-club-3": "GNBL Club",
+  "m-name-1": "E. Oliver", "m-club-1": "Long Buckby Club"
+};
+Object.keys(highestScores).forEach(k => { const e = document.querySelector(`#${k}`) || document.querySelector(`[data-field="${k}"]`); if(e) e.textContent = highestScores[k]; });
+document.querySelectorAll('#highestTable [contenteditable]').forEach(c => c.addEventListener('blur', () => {
+  const k = c.id || c.dataset.field; highestScores[k] = c.textContent.trim(); localStorage.setItem('byfieldHighestScores', JSON.stringify(highestScores));
+}));
+
+function recalculateTeam(t) { t.p = t.w + t.l + t.d; return t; }
+teams = teams.map(recalculateTeam);
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  teams.forEach((team, i) => {
+    const diff = team.lf - team.la;
+    const pts  = team.w * 2 + team.d;
+    tbody.innerHTML += `
+      <tr>
+        <td class="team-name" contenteditable="true" data-index="${i}">${team.name}</td>
+        <td><input type="number" min="0" data-index="${i}" data-field="p" value="${team.p}" readonly style="background:#f0f0f0;"></td>
+        <td><input type="number" min="0" data-index="${i}" data-field="w" value="${team.w}"></td>
+        <td><input type="number" min="0" data-index="${i}" data-field="l" value="${team.l}"></td>
+        <td><input type="number" min="0" data-index="${i}" data-field="d" value="${team.d}"></td>
+        <td class="legss"><input type="number" min="0" data-index="${i}" data-field="lf" value="${team.lf}"></td>
+        <td class="legss"><input type="number" min="0" data-index="${i}" data-field="la" value="${team.la}"></td>
         <td class="diff">${diff}</td>
         <td class="points">${pts}</td>
       </tr>`;
-    });
-  }
-
-  function updateHighestScores() {
-    Object.keys(state.highest).forEach(k => {
-      const el = document.getElementById(k) || document.querySelector(`[data-field="${k}"]`);
-      if (el) el.textContent = state.highest[k];
-    });
-  }
-
-  function saveToHistory() { if (!isUndoing) { history.push(structuredClone(state)); future = []; updateButtons(); } }
-  function undo() { if (history.length === 0) return; isUndoing = true; future.push(structuredClone(state)); state = history.pop(); applyState(); syncToCloud(); isUndoing = false; }
-  function redo() { if (future.length === 0) return; isUndoing = true; history.push(structuredClone(state)); state = future.pop(); applyState(); syncToCloud(); isUndoing = false; }
-  function updateButtons() {
-    document.getElementById('undoBtn').disabled = history.length === 0;
-    document.getElementById('redoBtn').disabled = future.length === 0;
-  }
-
-  function syncToCloud() {
-    if (isLocalChange) return;
-    isLocalChange = true;
-    set(leagueRef, {data: state, ts: Date.now()})
-      .then(() => isLocalChange = false)
-      .catch(() => isLocalChange = false);
-  }
-
-  // Input handlers (with history + sync)
-  document.getElementById('leagueTable').addEventListener('input', e => {
-    const el = e.target; const i = +el.dataset.index; if (isNaN(i)) return;
-    saveToHistory();
-    if (el.classList.contains('team-name')) state.teams[i].name = el.textContent.trim();
-    else state.teams[i][el.dataset.field] = parseInt(el.value) || 0;
-    applyState(); syncToCloud();
   });
+}
 
-  document.querySelectorAll('#highestTable [contenteditable]').forEach(el => {
-    el.addEventListener('blur', () => {
-      saveToHistory();
-      const k = el.id || el.dataset.field;
-      state.highest[k] = el.textContent.trim();
-      applyState(); syncToCloud();
-    });
+document.getElementById('leagueTable').addEventListener('input', e => {
+  if (isUndoing) return;
+  saveToHistory();
+  const cell = e.target;
+  const i = parseInt(cell.dataset.index);
+  if (isNaN(i)) return;
+  if (cell.classList.contains('team-name')) teams[i].name = cell.textContent.trim();
+  else {
+    teams[i][cell.dataset.field] = parseInt(cell.value) || 0;
+    if (['w','l','d'].includes(cell.dataset.field)) teams[i] = recalculateTeam(teams[i]);
+  }
+  localStorage.setItem('byfieldSkittlesLeague', JSON.stringify(teams));
+  renderTable();
+});
+
+function addTeam() { saveToHistory(); teams.push(recalculateTeam({name:"New Team",p:0,w:0,l:0,d:0,lf:0,la:0})); renderTable(); }
+
+function saveAsCSV() {
+  let csv = "Team,Played,Wins,Losses,Draws,Legs For,Legs Against,Diff,Points\n";
+  teams.forEach(t => { const diff = t.lf - t.la; const pts = t.w * 2 + t.d; csv += `"${t.name.replace(/"/g, '""')}",${t.p},${t.w},${t.l},${t.d},${t.lf},${t.la},${diff},${pts}\n`; });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = `Byfield_Skittles_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+}
+
+function saveAsPDF() {
+  document.getElementById('status').textContent = 'Creating PDF...';
+  const l = document.querySelector('#leagueTable').closest('.table-container').cloneNode(true);
+  const h = document.querySelector('#highestTable').closest('.table-container').cloneNode(true);
+  document.getElementById('pdfLeagueTable').innerHTML = l.innerHTML;
+  document.getElementById('pdfHighestTable').innerHTML = h.innerHTML;
+  document.querySelectorAll('body > *').forEach(el => el.style.display = 'none');
+  document.getElementById('pdfContent').style.display = 'block';
+  html2canvas(document.getElementById('pdfContent'), {scale: 2, backgroundColor: 'white'}).then(canvas => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const w = pdf.internal.pageSize.getWidth();
+    const h = (canvas.height * w) / canvas.width;
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 10, w-20, h);
+    pdf.save(`Byfield_Skittles_${new Date().toISOString().slice(0,10)}.pdf`);
+    document.querySelectorAll('body > *').forEach(el => el.style.display = '');
+    document.getElementById('pdfContent').style.display = 'none';
+    document.getElementById('status').textContent = 'PDF saved!';
+    setTimeout(() => document.getElementById('status').textContent = 'All changes saved automatically', 3000);
   });
+}
 
-  document.getElementById('addBtn').onclick = () => {
-    saveToHistory(); state.teams.push({name:"New Team",p:0,w:0,l:0,d:0,lf:0,la:0});
-    applyState(); syncToCloud();
-  };
-  document.getElementById('undoBtn').onclick = undo;
-  document.getElementById('redoBtn').onclick = redo;
+function removeTeam() {
+  if (teams.length <= 1) {
+    alert("You can't remove the last team!");
+    return;
+  }
+  
+  // Ask which team to remove
+  const teamNames = teams.map((t, i) => `${i+1}. ${t.name}`).join('\n');
+  const input = prompt(`Which team do you want to remove?\n\nEnter number (1-${teams.length}):\n\n${teamNames}`);
+  
+  if (input === null) return; // cancelled
+  
+  const index = parseInt(input) - 1;
+  
+  if (isNaN(index) || index < 0 || index >= teams.length) {
+    alert("Invalid number! Try again.");
+    return;
+ 0;
+  }
+  
+  const teamName = teams[index].name;
+  if (!confirm(`Delete "${teamName}" permanently?`)) return;
+  
+  // Save to history first
+  saveToHistory();
+  
+  // Remove the team
+  teams.splice(index, 1);
+  
+  // Update localStorage + Firebase + re-render
+  localStorage.setItem('byfieldSkittlesLeague', JSON.stringify(teams));
+  if (typeof set !== 'undefined') {
+    set(leagueRef, { teams, highest: highestScores });
+  }
+  
+  renderTable();
+  document.getElementById('status').textContent = `"${teamName}" removed`;
+  setTimeout(() => document.getElementById('status').textContent = 'All changes saved automatically', 2500);
+}
 
-  // CSV, PDF, WhatsApp, Email, Swipe — all same as before (they work perfectly)
-
-  // Init service worker
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+history.push(deepClone(originalTeams));
+applyState(teams);
+updateHistoryButtons();
+renderTable();
 </script>
+
+<p style="text-align:center; color:#555; margin:60px 0 40px; font-size:1rem;">
+  Share via WhatsApp • Share via Email • "Copied to clipboard!" popup • Fixed team column<br>
+  The ultimate Byfield Skittles tool — used by champions since 2025!
+</p>
 </body>
 </html>
+
