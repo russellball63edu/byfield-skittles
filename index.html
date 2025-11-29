@@ -1,7 +1,8 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Byfield Skittles League + Highest Scores</title>
 <style>
   body { 
@@ -35,7 +36,8 @@
     width: 210px !important;
     min-width: 210px !important;
     max-width: 210px !important;
-  }  .team-name { 
+  }
+  .team-name { 
     text-align: left !important; 
     padding-left: 15px; 
     background: #eefaf8 !important; 
@@ -44,7 +46,8 @@
     text-overflow: ellipsis;
     font-size: 1.1em !important;
     font-weight: bold !important;
-  }  input { 
+  }
+  input { 
     width: 100%; 
     padding: 8px 4px; 
     border: none; 
@@ -52,8 +55,10 @@
     font-weight: bold; 
     box-sizing: border-box; 
     font-size: 1em;
-  }  .legs, .diff { font-weight: bold; background: #f8f8f8; }
-  .points { font-weight: bold; font-size: 1.2em; background: #e8f5e9; }  #highestTable { 
+  }
+  .legs, .diff { font-weight: bold; background: #f8f8f8; }
+  .points { font-weight: bold; font-size: 1.2em; background: #e8f5e9; }
+  #highestTable { 
     max-width: 800px; 
     margin: 40px auto; 
     border: 3px solid #8e44ad; 
@@ -68,7 +73,8 @@
     color: #006f62; 
     background: #f0f8f7 !important; 
     height: 80px;
-  }  /* BUTTONS */
+  }
+  /* BUTTONS */
   .action-btn {
     margin: 10px 8px;
     padding: 14px 28px;
@@ -82,19 +88,23 @@
     transition: all 0.3s;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   }
-  .action-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }  #addTeamBtn   { background: #2980b9; }
+  .action-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+  #addTeamBtn   { background: #2980b9; }
   #undoBtn      { background: #e74c3c; }
   #redoBtn      { background: #9b59b6; }
   #saveCsvBtn   { background: #27ae60; }
   #savePdfBtn   { background: linear-gradient(45deg, #e67e22, #f39c12); }
-  #shareBtn     { background: #25D366; }  #undoBtn:disabled, #redoBtn:disabled {
+  #shareBtn     { background: #25D366; }
+  #undoBtn:disabled, #redoBtn:disabled {
     background: #95a5a6 !important;
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none;
-  }  .save-status { text-align: center; color: #0a0; font-weight: bold; margin: 10px 0; font-size: 1.1em; }
+  }
+  .save-status { text-align: center; color: #0a0; font-weight: bold; margin: 10px 0; font-size: 1.1em; }
   .history-info { text-align: center; color: #555; font-size: 0.9em; margin-top: 5px; }
-  #pdfContent { display: none; background: white; padding: 40px; }  /* POPUP NOTIFICATION */
+  #pdfContent { display: none; background: white; padding: 40px; }
+  /* POPUP NOTIFICATION */
   #copyPopup {
     position: fixed;
     top: 50%;
@@ -117,7 +127,8 @@
     visibility: visible;
     transform: translate(-50%, -50%) scale(1.05);
   }
-</style><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -226,7 +237,7 @@ function shareTable() {
   // Always copy to clipboard first
   navigator.clipboard.writeText(message.replace(/%0A/g, '\n')).then(() => {
     showCopyPopup(); // Show popup
-  });
+  }).catch(() => { /* ignore clipboard failures */ });
 
   // Then open WhatsApp/SMS on mobile
   if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
@@ -237,7 +248,7 @@ function shareTable() {
   }
 }
 
-// FULL DATA & LOGIC (unchanged)
+// FULL DATA & LOGIC (unchanged except for removeTeam fix)
 const originalTeams = [
   { name: "Peppermill 'A'", p:11, w:9, l:2, d:0, lf:399, la:324 },
   { name: "Silverstone", p:11, w:8, l:2, d:1, lf:401, la:342 },
@@ -306,11 +317,12 @@ function renderTable() {
 
 document.getElementById('leagueTable').addEventListener('input', e => {
   if (isUndoing) return;
-  saveToHistory();
   const cell = e.target;
   const i = parseInt(cell.dataset.index);
   if (isNaN(i)) return;
-  if (cell.classList.contains('team-name')) teams[i].name = cell.textContent.trim();
+  // Save a snapshot before making the change (so undo works)
+  saveToHistory();
+  if (cell.classList && cell.classList.contains('team-name')) teams[i].name = cell.textContent.trim();
   else {
     teams[i][cell.dataset.field] = parseInt(cell.value) || 0;
     if (['w','l','d'].includes(cell.dataset.field)) teams[i] = recalculateTeam(teams[i]);
@@ -346,6 +358,9 @@ function saveAsPDF() {
     document.getElementById('pdfContent').style.display = 'none';
     document.getElementById('status').textContent = 'PDF saved!';
     setTimeout(() => document.getElementById('status').textContent = 'All changes saved automatically', 3000);
+  }).catch(() => {
+    document.getElementById('status').textContent = 'PDF generation failed';
+    setTimeout(() => document.getElementById('status').textContent = 'All changes saved automatically', 3000);
   });
 }
 
@@ -361,12 +376,11 @@ function removeTeam() {
   
   if (input === null) return; // cancelled
   
-  const index = parseInt(input) - 1;
+  const index = parseInt(input, 10) - 1;
   
   if (isNaN(index) || index < 0 || index >= teams.length) {
     alert("Invalid number! Try again.");
     return;
- 0;
   }
   
   const teamName = teams[index].name;
@@ -378,10 +392,11 @@ function removeTeam() {
   // Remove the team
   teams.splice(index, 1);
   
-  // Update localStorage + Firebase + re-render
+  // Persist and re-render
   localStorage.setItem('byfieldSkittlesLeague', JSON.stringify(teams));
-  if (typeof set !== 'undefined') {
-    set(leagueRef, { teams, highest: highestScores });
+  // Optional remote sync if available
+  if (typeof set !== 'undefined' && typeof leagueRef !== 'undefined') {
+    try { set(leagueRef, { teams, highest: highestScores }); } catch(e) { /* ignore */ }
   }
   
   renderTable();
@@ -401,4 +416,3 @@ renderTable();
 </p>
 </body>
 </html>
-
